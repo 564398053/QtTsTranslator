@@ -1,11 +1,13 @@
 package com.amoy.QtTsTranslator;
 
+import Translator.Translator;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
 import java.util.List;
 
+// TS file structure
 //<?xml version="1.0" encoding="utf-8"?>
 //<!DOCTYPE TS>
 //<TS version="2.1" language="fr_FR">
@@ -22,30 +24,41 @@ import java.util.List;
 public class TsParser {
     String mFileName;
     Document mDocument;
+    Translator mTranslator;
+
     public TsParser(String file) {
         mFileName = file;
+    }
+
+    public void setTranslator(Translator translator) {
+        mTranslator = translator;
     }
 
     void doParse() throws Exception {
         SAXReader saxReader = new SAXReader();
         mDocument = saxReader.read(mFileName);
-        Element rootElement = mDocument.getRootElement();
+        Element elRoot = mDocument.getRootElement();
 
-        String language = rootElement.attributeValue("language");
+        String language = elRoot.attributeValue("language");
         System.out.println("File Language: " + language);
-        List<Element> servletElements = rootElement.elements("servlet");
-        // 5. 遍历, 并获取该标签下的子标签数据内容, 使用父标签对象调用elementText方法, 传入子标签名称获取数据
-        for (Element servlet : servletElements) {
-            String name = servlet.elementText("servlet-name");
-            String cls = servlet.elementText("servlet-class");
-            System.out.println(name + " : " + cls);
-        }
-        // 使用 rootElement 根标签对象调用 elements 方法, 传入 servlet-mapping, 获取servlet-mapping标签对象
-        List<Element> mappingElements = rootElement.elements("servlet-mapping");
-        for (Element mapping : mappingElements) {
-            String name = mapping.elementText("servlet-name");
-            String url = mapping.elementText("url-pattern");
-            System.out.println(name + " = " + url);
+
+        List<Element> elContextList = elRoot.elements("context");
+        for (Element elContext : elContextList) {
+
+            List<Element> elMessageList = elContext.elements("message");
+            for (Element elMessage : elMessageList) {
+                String source = elMessage.elementText("source"); // the string to translate
+
+                Element elTranslation = elMessage.element("translation");
+                String translationType = elTranslation.attributeValue("type");
+
+                List<String> translationList = mTranslator.translate(source);
+                // Only translate the unfinished items.
+                boolean bUnfinished = translationType.equals("unfinished");
+                if (bUnfinished) {
+                    System.out.println("Unfinished item: " + source);
+                }
+            }
         }
     }
 
