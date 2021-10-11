@@ -1,6 +1,7 @@
 package com.amoy.QtTsTranslator;
 
 import Translator.Translator;
+import Translator.YoudaoDictTranslator;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
@@ -24,7 +25,7 @@ import java.util.List;
 public class TsParser {
     String mFileName;
     Document mDocument;
-    Translator mTranslator;
+    Translator mTranslator = new YoudaoDictTranslator(); // default use YoudaoDict
 
     public TsParser(String file) {
         mFileName = file;

@@ -3,12 +3,13 @@ package DictCache;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class DictCache {
-    private Map<String, List<String>> valueMap = new HashMap<>(); // word, translations
+    private Map<String, List<String>> valueMap = new HashMap<>(); // <source, translations>
     private String lang; // the current language
 
     public DictCache(String lang) {
@@ -33,7 +34,7 @@ public class DictCache {
     }
 
     public List<String> get(String key) {
-        return valueMap.get(key);
+        return valueMap.getOrDefault(key, new ArrayList<>());
     }
 
     private String getDictPath() {

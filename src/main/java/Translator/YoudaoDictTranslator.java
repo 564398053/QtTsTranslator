@@ -3,6 +3,7 @@ package Translator;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import DictCache.DictCache;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -50,6 +51,18 @@ public class YoudaoDictTranslator implements Translator {
 
     @Override
     public List<String> translate(String source, String from, String to) throws Exception {
+        // get from cache first
+        DictCache dictCache = new DictCache(to);
+        try {
+            dictCache.load();
+            List<String> trans = dictCache.get(source);
+            if (!trans.isEmpty()) {
+                return trans;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         Map<String,String> params = new HashMap<String,String>();
         String q = source;
         String salt = String.valueOf(System.currentTimeMillis());
@@ -67,6 +80,12 @@ public class YoudaoDictTranslator implements Translator {
         params.put("vocabId","您的用户词表ID");
         /** 处理结果 */
         List<String> result = requestForHttp(YOUDAO_URL, params);
+
+        if (result != null && !result.isEmpty()) {
+            dictCache.put(source, result);
+            dictCache.save();
+        }
+
         return result;
     }
 
