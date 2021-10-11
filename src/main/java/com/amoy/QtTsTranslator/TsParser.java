@@ -52,7 +52,7 @@ public class TsParser {
                 Element elTranslation = elMessage.element("translation");
                 String translationType = elTranslation.attributeValue("type");
 
-                List<String> translationList = mTranslator.translate(source);
+                List<String> translationList = mTranslator.translate(source, "en", language);
                 // Only translate the unfinished items.
                 boolean bUnfinished = translationType.equals("unfinished");
                 if (bUnfinished) {
