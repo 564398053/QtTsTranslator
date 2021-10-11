@@ -11,5 +11,6 @@ public class QtTsTranslatorApplication {
 
 		TsParser parser = new TsParser("src/main/resources/hellotr_fr.ts");
 		parser.doParse();
+		parser.save();
 	}
 }

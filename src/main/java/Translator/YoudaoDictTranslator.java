@@ -23,9 +23,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
-class Translation {
-    public String query;
+class TranslationResult {
     public List<String> translation;
+    public String query;
     public String errorCode;
     public String l;
     public String tSpeakUrl;
@@ -63,7 +63,7 @@ public class YoudaoDictTranslator implements Translator {
             e.printStackTrace();
         }
 
-        Map<String,String> params = new HashMap<String,String>();
+        Map<String, String> params = new HashMap<String, String>();
         String q = source;
         String salt = String.valueOf(System.currentTimeMillis());
         params.put("from", from);
@@ -77,7 +77,7 @@ public class YoudaoDictTranslator implements Translator {
         params.put("q", q);
         params.put("salt", salt);
         params.put("sign", sign);
-        params.put("vocabId","您的用户词表ID");
+        params.put("vocabId", "您的用户词表ID");
         /** 处理结果 */
         List<String> result = requestForHttp(YOUDAO_URL, params);
 
@@ -96,41 +96,41 @@ public class YoudaoDictTranslator implements Translator {
     private static final String APP_KEY = "2baf0424f27f4486";
     private static final String APP_SECRET = "VT4ZBELhAnk6ZXHeZqwVSP1WiJ2egeGf";
 
-    private static List<String> requestForHttp(String url, Map<String,String> params) throws IOException {
+    private static List<String> requestForHttp(String url, Map<String, String> params) throws IOException {
         /** 创建HttpClient */
         CloseableHttpClient httpClient = HttpClients.createDefault();
 
         /** httpPost */
         HttpPost httpPost = new HttpPost(url);
         List<NameValuePair> paramsList = new ArrayList<NameValuePair>();
-        Iterator<Map.Entry<String,String>> it = params.entrySet().iterator();
-        while(it.hasNext()){
-            Map.Entry<String,String> en = it.next();
+        Iterator<Map.Entry<String, String>> it = params.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<String, String> en = it.next();
             String key = en.getKey();
             String value = en.getValue();
-            paramsList.add(new BasicNameValuePair(key,value));
+            paramsList.add(new BasicNameValuePair(key, value));
         }
-        httpPost.setEntity(new UrlEncodedFormEntity(paramsList,"UTF-8"));
+        httpPost.setEntity(new UrlEncodedFormEntity(paramsList, "UTF-8"));
         CloseableHttpResponse httpResponse = httpClient.execute(httpPost);
-        try{
+        try {
             Header[] contentType = httpResponse.getHeaders("Content-Type");
             // logger.info("Content-Type:" + contentType[0].getValue());
             /** 响应不是音频流，直接显示结果 */
             HttpEntity httpEntity = httpResponse.getEntity();
-            String json = EntityUtils.toString(httpEntity,"UTF-8");
+            String json = EntityUtils.toString(httpEntity, "UTF-8");
             EntityUtils.consume(httpEntity);
 
             ObjectMapper mapper = new ObjectMapper();
-            Translation translation = mapper.readValue(json, Translation.class);
+            TranslationResult translation = mapper.readValue(json, TranslationResult.class);
             // logger.info(mapper.writeValueAsString(translation));
 
             return translation.translation;
         } finally {
-            try{
-                if(httpResponse!=null){
+            try {
+                if (httpResponse != null) {
                     httpResponse.close();
                 }
-            }catch(IOException e){
+            } catch (IOException e) {
                 logger.info("## release resouce error ##" + e);
             }
         }
@@ -163,21 +163,20 @@ public class YoudaoDictTranslator implements Translator {
     }
 
     /**
-     *
      * @param result 音频字节流
-     * @param file 存储路径
+     * @param file   存储路径
      */
     private static void byte2File(byte[] result, String file) {
         File audioFile = new File(file);
         FileOutputStream fos = null;
-        try{
+        try {
             fos = new FileOutputStream(audioFile);
             fos.write(result);
 
-        }catch (Exception e){
+        } catch (Exception e) {
             logger.info(e.toString());
-        }finally {
-            if(fos != null){
+        } finally {
+            if (fos != null) {
                 try {
                     fos.close();
                 } catch (IOException e) {
